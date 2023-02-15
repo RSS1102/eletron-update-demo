@@ -1,0 +1,45 @@
+/**
+ * @see https://www.electron.build/configuration/configuration
+ */
+{
+  "appId": "YourAppID",
+  "asar": true,
+  "directories": {
+    "output": "release/${version}"
+  },
+  "files": [
+    "dist-electron",
+    "dist"
+  ],
+  "mac": {
+    "artifactName": "${productName}_${version}.${ext}",
+    "target": [
+      "dmg"
+    ]
+  },
+  "win": {
+    //      extraFiles: [
+    //   { from: "", to: ".", filter: ["*.yml"] },
+    // ],
+    "target": [
+      {
+        "target": "nsis",
+        "arch": [
+          "x64"
+        ]
+      }
+    ],
+    "artifactName": "${productName}_${version}.${ext}"
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "deleteAppDataOnUninstall": false
+  },
+   publish: {
+        provider: 'generic',
+        channel: 'latest-win32',
+        url: 'http://101.34.251.59:888/electron/',
+    },
+}

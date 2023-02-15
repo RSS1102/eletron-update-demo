@@ -1,0 +1,4 @@
+provider: generic
+channel: latest-win32
+url: http://101.34.251.59:888/electron/
+updaterCacheDirName: electron-vite-react-updater
