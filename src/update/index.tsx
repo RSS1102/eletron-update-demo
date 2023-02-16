@@ -15,6 +15,7 @@ const Update = () => {
   })
 
   ipcRenderer.on('need-update', (e, arg) => {
+    console.log(arg)
     setisModalOpen(arg.isUpdate)
     setVersion({
       oldVersion: arg.oldVersion ?? `null`,

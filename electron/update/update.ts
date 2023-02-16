@@ -1,9 +1,7 @@
 import { autoUpdater } from "electron-updater"
-import log from 'electron-log';
 import { app, ipcMain } from "electron";
 export const update = (win: Electron.CrossProcessExports.BrowserWindow) => {
   // 设置日志打印
-  autoUpdater.logger = log;
 
   // 是否自动下载更新，设置为 false 时将通过 API 触发更新下载
   autoUpdater.autoDownload = false;
@@ -11,7 +9,7 @@ export const update = (win: Electron.CrossProcessExports.BrowserWindow) => {
   autoUpdater.disableWebInstaller = true
 
   // 是否允许版本降级，也就是服务器版本低于本地版本时，依旧以服务器版本为主
-  autoUpdater.allowDowngrade = true;
+  autoUpdater.allowDowngrade = false;
 
   // 设置服务器版本最新版本查询接口配置
   autoUpdater.setFeedURL({
@@ -31,34 +29,22 @@ export const update = (win: Electron.CrossProcessExports.BrowserWindow) => {
 
   // 调用 API 检查是否用更新
   autoUpdater.checkForUpdatesAndNotify()
-    .then((UpdateCheckResult) => {
-      // log.info(UpdateCheckResult, autoUpdater.currentVersion.version);
-      console.log(app.getVersion())
-      console.log("update", UpdateCheckResult && UpdateCheckResult?.updateInfo?.version)
-      // 判断版本不一致，强制更新
-      if ((UpdateCheckResult && UpdateCheckResult?.updateInfo?.version) !== autoUpdater.currentVersion.version) {
-        // 调起更新窗口
-        win.webContents.send('need-update', { isUpdate: true, oldVersion: app.getVersion(), newVersion: UpdateCheckResult?.updateInfo?.version })
-      }
-    }).catch(e => {
-      console.log("fail", e)
-    });
-
+  // 检测开始
+  autoUpdater.on('checking-for-update', function () {
+    console.log('checking-for-update')
+  })
+  // 更新可用
+  autoUpdater.on('update-available', (arg) => {
+    console.log('update-available', arg)
+    win.webContents.send('need-update', { isUpdate: true, oldVersion: app.getVersion(), newVersion: arg?.version })
+  })
+  // 更新不可用
+  autoUpdater.on('update-not-available', function () {
+    console.log('update-not-available')
+  })
 
   // API 触发更新下载
-  const startDownload = (callback, successCallback) => {
-    // 检测开始
-    autoUpdater.on('checking-for-update', function () {
-      console.log('checking-for-update')
-    })
-    // 更新可用
-    autoUpdater.on('update-available', function () {
-      console.log('update-available')
-    })
-    // 更新不可用
-    autoUpdater.on('update-not-available', function () {
-      console.log('update-not-available')
-    })
+  const startDownload = (callback: any, successCallback: any) => {
     // 监听下载进度并推送到更新窗口
     autoUpdater.on('download-progress', (data) => {
       console.log("progress", data)
@@ -103,6 +89,7 @@ export const update = (win: Electron.CrossProcessExports.BrowserWindow) => {
     );
   });
 
+  // 用户点击安装后程序退出执行立即安装更新
   ipcMain.on('quit-and-install', () => {
     autoUpdater.quitAndInstall(false, true);
   })

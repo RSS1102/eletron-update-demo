@@ -1,7 +1,7 @@
 import { app, BrowserWindow, shell, ipcMain, dialog, Menu, MenuItemConstructorOptions, MenuItem } from 'electron'
 import { release } from 'node:os'
 import { join } from 'node:path'
-import { update } from './update'
+import { update } from '../update/update'
 
 
 // The built directory structure
