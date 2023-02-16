@@ -68,6 +68,7 @@ async function createWindow() {
   // Test actively push message to the Electron-Renderer
   win.webContents.on('did-finish-load', () => {
     win?.webContents.send('main-process-message', new Date().toLocaleString())
+    update(win)
   })
 
   // Make all links open with the browser, not with the application
@@ -85,7 +86,6 @@ async function createWindow() {
   ]
   const menu = Menu.buildFromTemplate(menuitem)
   Menu.setApplicationMenu(menu)
-  update(win)
 }
 
 app.whenReady().then(createWindow)
@@ -128,53 +128,3 @@ ipcMain.handle('open-win', (_, arg) => {
     childWindow.loadFile(indexHtml, { hash: arg })
   }
 })
-// ipcMain.on('need-update',(arr,arg)=>{
-//   console.log("xx")
-// })
-
-
-// let updater: any
-// autoUpdater.autoDownload = false
-
-// autoUpdater.on('error', (error) => {
-//   dialog.showErrorBox('Error: ', error == null ? "unknown" : (error.stack || error).toString())
-// })
-
-// autoUpdater.on('error', (error) => {
-//   dialog.showErrorBox('Error: ', error == null ? "unknown" : (error.stack || error).toString())
-// })
-
-// autoUpdater.on('update-available', () => {
-//   dialog.showMessageBox({
-//     type: 'info',
-//     title: 'Found Updates',
-//     message: 'Found updates, do you want update now?',
-//     buttons: ['Sure', 'No']
-//   }).then(res => {
-//     if (res.response === 0) {
-//       autoUpdater.downloadUpdate()
-//     }
-//     else {
-//       updater.enabled = true
-//       updater = null
-//     }
-//   })
-// })
-
-// autoUpdater.on('update-not-available', () => {
-//   dialog.showMessageBox({
-//     title: 'No Updates',
-//     message: 'Current version is up-to-date.'
-//   })
-//   updater.enabled = true
-//   updater = null
-// })
-
-// autoUpdater.on('update-downloaded', () => {
-//   dialog.showMessageBox({
-//     title: 'Install Updates',
-//     message: 'Updates downloaded, application will be quit for update...'
-//   }).then(() => {
-//     setImmediate(() => autoUpdater.quitAndInstall())
-//   })
-// })

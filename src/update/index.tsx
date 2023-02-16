@@ -1,28 +1,60 @@
 
-import { Modal } from "antd"
+import { Modal, Progress } from "antd"
 import { ipcRenderer } from "electron"
-import { useEffect, useState } from "react"
-const Update=()=>{
-  const [isModalOpen, setisModalOpen]=useState(false)
-  const [progress, setProgress] = useState(null)
-
-  ipcRenderer.on('need-update', (e, data) => {
-    console.log("data", data);
+import { useState } from "react"
+const Update = () => {
+  const [isModalOpen, setisModalOpen] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [version, setVersion] = useState({
+    newVersion: 0.00,
+    oldVersion: 0.00
   })
-  ipcRenderer.on('download-progress-data', (arr, arg) =>{
-    setProgress(arg.percent)
+  const [text, setText] = useState({
+    okText: '更新',
+    cancelText: '取消'
+  })
+
+  ipcRenderer.on('need-update', (e, arg) => {
+    setisModalOpen(arg.isUpdate)
+    setVersion({
+      oldVersion: arg.oldVersion ?? `null`,
+      newVersion: arg.newVersion ?? `null`,
+    })
+  })
+  ipcRenderer.on('download-progress-data', (arr, arg) => setProgress(arg.percent))
+  ipcRenderer.on('update-downed', (arr, arg) => {
+    setProgress(100)
+    setText({
+      okText: '立即安装',
+      cancelText: '稍后安装'
+    })
   })
 
   const handleOk = () => {
-    ipcRenderer.send('start-download', true)
+    if (progress < 100) {
+      ipcRenderer.send('start-download', true)
+    } else {
+      console.log("安装")
+      ipcRenderer.send("quit-and-install")
+
+    }
   }
   const handleCancel = () => setisModalOpen(false)
-  
-  return(
+  const progressFormat = (percent: number | undefined) => `${percent?.toFixed(2)}%`
+
+  return (
     <>
 
-      <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-        进度:{progress}
+      <Modal title="有可更新程序"
+        open={isModalOpen} onOk={handleOk}
+        okText={text.okText}
+        cancelText={text.cancelText}
+        onCancel={handleCancel}
+        maskClosable={false}
+        keyboard={false}>
+        <div>当前版本:{version.oldVersion},可用最新版本: {version.newVersion}</div>
+        进度:
+        <Progress percent={progress} format={progressFormat} />
       </Modal>
     </>
   )
